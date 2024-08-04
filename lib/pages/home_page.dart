@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_habit_tracker/components/my_drawer.dart';
+import 'package:flutter_habit_tracker/components/my_habit_tile.dart';
 import 'package:flutter_habit_tracker/database/habit_database.dart';
 import 'package:flutter_habit_tracker/models/habit.dart';
 import 'package:flutter_habit_tracker/theme/theme_provider.dart';
@@ -31,7 +35,8 @@ class _HomePageState extends State<HomePage> {
         builder: (context) => AlertDialog(
               content: TextField(
                 controller: textController,
-                decoration: InputDecoration(hintText: 'Create a new habit'),
+                decoration:
+                    const InputDecoration(hintText: 'Create a new habit'),
               ),
               actions: [
                 // save
@@ -56,6 +61,13 @@ class _HomePageState extends State<HomePage> {
                 )
               ],
             ));
+  }
+
+  void checkHabitOnOff(bool? value, Habit habit) {
+    // update habit compl status
+    if (value != null) {
+      context.read<HabitDatabase>().updateHabitCompletion(habit.id, value);
+    }
   }
 
   @override
@@ -85,7 +97,7 @@ class _HomePageState extends State<HomePage> {
 
     // return list of habits UI
     if (currentHabits.isEmpty) {
-      return ListTile(title: Text('No habits'));
+      return const ListTile(title: Text('No habits'));
     }
 
     return ListView.builder(
@@ -98,10 +110,7 @@ class _HomePageState extends State<HomePage> {
         bool isCompletedToday = isHabitCompletedToday(habit.completedDays);
 
         // Return habit tile UI
-        return ListTile(
-          title: Text(habit.name),
-          trailing: isCompletedToday ? Icon(Icons.check) : null,
-        );
+        return MyHabitTile(text: habit.name, isCompleted: isCompletedToday, onChanged: (value) => checkHabitOnOff(value, habit));
       },
     );
   }
